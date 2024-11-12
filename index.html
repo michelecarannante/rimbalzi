@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dot Animation</title>
+  <style>
+    * {
+      margin: 0;
+      overflow: hidden;
+    }
+
+    button {
+      position: fixed;
+      color: white;
+      background: transparent;
+      border: none;
+      font-family: Helvetica, sans-serif;
+      padding: 2rem;
+      font-size: 1.4rem;
+      cursor: pointer;
+      letter-spacing: 2px;
+      transition: all 200ms ease-out;
+    }
+
+    button:hover {
+      color: #00fff9;
+      scale: 1.2;
+    }
+
+    .footer-text {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: black;
+      font-family: Georgia, serif;
+      font-size: 2rem;
+      text-align: center;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <button id="restart">restart</button>
+  <canvas id="canvas"></canvas>
+  <div class="footer-text">Scilla Cariddi Rental Boat</div>
+  <script>
+    const canvas = document.getElementById('canvas');
+    const c = canvas.getContext('2d');
+
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
+    document.body.append(canvas);
+
+    c.fillStyle = 'red';
+    c.fillRect(0, 0, canvas.width, canvas.height);
+
+    let grav = 0.11;
+    let floor = innerHeight - innerHeight / 4;
+
+    class Dot {
+      constructor({ first, x, y, r, idx }) {
+        this.x = x;
+        this.y = y;
+        this.r = r;
+        this.vx = (first) ? Math.random() * 3 + 1 : Math.random() * 6 - 3;
+        this.vy = -Math.random() * 6 - 3;
+        this.a = 1;
+        this.idx = idx;
+        this.floor = floor + Math.random() * (this.r / 2 + 150);
+      }
+      draw() {
+        if (this.dead) {
+          c.globalAlpha = this.a;
+          this.r += 3;
+          this.a -= 0.04;
+          if (this.a < 0) {
+            this.a = 0;
+            return;
+          }
+          c.fillStyle = '#ff5700';
+          c.beginPath();
+          c.arc(this.x, this.y, this.r, 0, 7);
+          c.fill();
+          return;
+        }
+        this.x += this.vx;
+        this.y += this.vy;
+        if (this.x + this.r >= innerWidth) {
+          this.vx *= -1;
+        }
+        if (this.x - this.r < 0) {
+          this.vx *= -1;
+        }
+
+        this.vy += grav;
+
+        if (this.y > this.floor - this.r) {
+          this.vy *= -0.5;
+          this.y = this.floor - this.r;
+          this.vx *= 0.7;
+          if (dots.length < 400) {
+            dots.push(new Dot({ x: this.x, y: this.y, r: this.r * 0.6 }));
+            dots.push(new Dot({ x: this.x, y: this.y, r: this.r * 0.6 }));
+            this.dead = true;
+          }
+        }
+        c.globalAlpha = 1;
+        c.fillStyle = 'black';
+        c.beginPath();
+        c.arc(this.x, this.y, this.r, 0, 7);
+        c.fill();
+      }
+    }
+
+    let dots;
+
+    function spurn() {
+      dots = [];
+      dots[0] = new Dot({ first: true, x: 150, y: innerWidth / 2, r: 100 });
+    }
+    spurn();
+
+    document.getElementById('restart').onclick = spurn;
+
+    function loop() {
+      c.fillStyle = 'rgba(255, 0, 0, 1)';
+      c.fillRect(0, 0, canvas.width, canvas.height);
+      dots.forEach(d => d?.draw?.());
+      requestAnimationFrame(loop);
+    }
+    loop();
+  </script>
+</body>
+</html>
